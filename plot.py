@@ -15,8 +15,12 @@ import subprocess
 
 class MyWindow(QWidget):
     def __init__(self):
+        self.layout = None
+        self.canvas2 = None
+        self.canvas = None
+        self.vis_origin = None
+        self.vis_output = None
         self.device_txt = 'cuda:0'
-        # print(self.device_txt)
         self.test_data = None
         self.H = 800
         self.W = 640
@@ -28,34 +32,33 @@ class MyWindow(QWidget):
         self.fileDir = None
         self.initUI()
         self.setLayout(self.layout)
-        self.setGeometry(200, 200, 800, 600)
+        self.setGeometry(200, 200, 800, 600)  # 창의 위치 x좌표, y좌표, 가로크기, 세로 크기
 
     def initUI(self):
-        self.vis_output = plt.Figure()
-        self.vis_origin = plt.Figure()
-        self.canvas = FigureCanvas(self.vis_output)
-        self.canvas2 = FigureCanvas(self.vis_origin)
+        self.vis_output = plt.Figure()  # 모델 아웃풋 이미지
+        self.vis_origin = plt.Figure()  # 모델 인풋 이미지
+        self.canvas = FigureCanvas(self.vis_output)  # 아웃풋 이미지 출력 박스
+        self.canvas2 = FigureCanvas(self.vis_origin)  # 인풋 이미지 출력 박스
 
-        layout = QHBoxLayout()
+        layout = QHBoxLayout()  # 메인 레이아웃 (Horizen)
         layout.addWidget(self.canvas2)
         layout.addWidget(self.canvas)
 
-        btn_layout = QVBoxLayout()
-        cb = QPushButton("Load Img")
-        cb.clicked.connect(self.img_load)
+        btn_layout = QVBoxLayout()  # 버튼, 리스트 레이아웃
+        load_img_btn = QPushButton("Load Img")
+        load_img_btn.clicked.connect(self.img_load)
         edit_btn = QPushButton('Edit Scatter')
         edit_btn.clicked.connect(self.edit_scatter)
-        btn_layout.addWidget(cb)
+
+        file_list = QListWidget(self)
+
+        btn_layout.addWidget(load_img_btn)
         btn_layout.addWidget(edit_btn)
-
-        file_list = Qli
-
-        # layout.addWidget(btn_layout)
+        btn_layout.addWidget(file_list)
 
         layout.addLayout(btn_layout)
 
         self.layout = layout
-        self.btn_layout = btn_layout
 
     def img_load(self):
         self.fileDir, _ = QFileDialog.getOpenFileName(self, "Open Img", r'./0img',
@@ -81,7 +84,6 @@ class MyWindow(QWidget):
         Ymap, Xmap = torch.tensor(Ymap.flatten(), dtype=torch.float).unsqueeze(1).to(self.device_txt), \
             torch.tensor(Xmap.flatten(), dtype=torch.float).unsqueeze(1).to(self.device_txt)
         ind = torch.cat([Xmap / W, Ymap / H], dim=1)
-
 
         with torch.no_grad():
             for inputs, size, name in self.test_data:
@@ -110,21 +112,24 @@ class MyWindow(QWidget):
                 self.canvas.draw()
 
     def edit_scatter(self):
-        self.vis_output, self.ax = plt.subplots(figsize=(12, 10))
-        plt.imshow(self.inputs, cmap='gray')
-        plt.xlabel('x')
-        plt.ylabel('y')
-        plt.title('Interactive Plot')
+        if self.fileDir != None:
+            self.vis_output, self.ax = plt.subplots(figsize=(12, 10))
+            plt.imshow(self.inputs, cmap='gray')
+            plt.xlabel('x')
+            plt.ylabel('y')
+            plt.title('Interactive Plot')
 
-        self.ax.set_aspect('auto', adjustable='box')
+            self.ax.set_aspect('auto', adjustable='box')
 
-        self.xdata = [0]
-        self.ydata = [0]
-        self.line, = self.ax.plot(self.xdata, self.ydata)
+            self.xdata = [0]
+            self.ydata = [0]
+            self.line, = self.ax.plot(self.xdata, self.ydata)
 
-        cid = plt.connect('button_press_event', self.add_point)
-        plt.tight_layout()
-        plt.show()
+            cid = plt.connect('button_press_event', self.add_point)
+            plt.tight_layout()
+            plt.show()
+        else:
+            QMessageBox.about(self, 'Notice', 'Plese Load Img.')
 
     def add_point(self, event):
         if event.inaxes != self.ax:
