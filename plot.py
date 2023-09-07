@@ -47,11 +47,6 @@ class MyWindow(QWidget):
         edit_btn.clicked.connect(self.edit_scatter)
         btn_layout.addWidget(cb)
         btn_layout.addWidget(edit_btn)
-
-        file_list = Qli
-
-        # layout.addWidget(btn_layout)
-
         layout.addLayout(btn_layout)
 
         self.layout = layout
@@ -60,15 +55,12 @@ class MyWindow(QWidget):
     def img_load(self):
         self.fileDir, _ = QFileDialog.getOpenFileName(self, "Open Img", r'./0img',
                                                       self.tr("Video Files (*.png)"))
-
         if self.fileDir != '':
             img = cv2.imread(self.fileDir)
             self.orig_H = img.shape[0]
             self.orig_W = img.shape[1]
-
             self.test_data = DataLoader(dataload(path=self.fileDir, H=self.H, W=self.W, aug=False), batch_size=1,
                                         shuffle=False, num_workers=5)
-
             s_time = time.time()
             self.predict()
             e_time = time.time()
