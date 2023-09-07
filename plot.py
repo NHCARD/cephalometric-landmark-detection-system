@@ -1,3 +1,4 @@
+import glob
 import sys
 import time
 
@@ -79,7 +80,7 @@ class MyWindow(QWidget):
             self.orig_H = img.shape[0]
             self.orig_W = img.shape[1]
 
-            self.test_data = DataLoader(dataload(path=self.fileDir, H=self.H, W=self.W, aug=False), batch_size=1,
+            self.test_data = DataLoader(dataload(path=self.fileDir, H=self.H, W=self.W, aug=False, mode='img'), batch_size=1,
                                         shuffle=False, num_workers=5)
 
             s_time = time.time()
@@ -89,17 +90,25 @@ class MyWindow(QWidget):
         else:
             pass
 
-    def directory_load (self):
-        self.fileDir, _ = QFileDialog.getExistingDirectory(self, "Open Directory", r'C:/')
+    def directory_load(self):
+        self.fileDir = QFileDialog.getExistingDirectory(self, "Open Directory", r'./')
 
         if self.fileDir != '':
-            self.test_data = DataLoader(dataload(path=self.fileDir, H=self.H, W=self.W, aug=False), batch_size=1,
+            self.test_data = DataLoader(dataload(path=self.fileDir, H=self.H, W=self.W, aug=False, mode='dir'), batch_size=1,
                                         shuffle=False, num_workers=5)
+
+
+            img = cv2.imread(glob.glob(self.fileDir + '/*.png')[0])
+
+            self.orig_H = img.shape[0]
+            self.orig_W = img.shape[1]
 
             s_time = time.time()
             self.predict()
             e_time = time.time()
             print(e_time - s_time)
+        else:
+            pass
 
     def predict(self):
         Ymap, Xmap = np.mgrid[0:H:1, 0:W:1]
@@ -116,22 +125,23 @@ class MyWindow(QWidget):
                 pred = torch.cat([argsoftmax(outputs[0].view(-1, H * W), Ymap, beta=1e-3) * (self.orig_H / H),
                                 argsoftmax(outputs[0].view(-1, H * W), Xmap, beta=1e-3) * (self.orig_W / W)],
                                 dim=1).detach().cpu()
+                print(len(size))
                 # print("pred : ", pred)
 
                 self.inputs = cv2.resize(inputs[0][0].detach().cpu().numpy(), (2880, 2400))
 
-                self.vis_output.clear()
-                ax = self.vis_output.add_subplot(111)
-                ax.axis('off')
-                ax.imshow(self.inputs, cmap='gray')
-                # ax.subplots_adjust(left=0)
+            self.vis_output.clear()
+            ax = self.vis_output.add_subplot(111)
+            ax.axis('off')
+            ax.imshow(self.inputs, cmap='gray')
+            # ax.subplots_adjust(left=0)
 
-                pred = pred.detach().cpu().numpy()
+            pred = pred.detach().cpu().numpy()
 
-                for i in pred:
-                    ax.scatter(int(i[1]), int(i[0]), s=20, marker='.', c='b')
+            for i in pred:
+                ax.scatter(int(i[1]), int(i[0]), s=20, marker='.', c='b')
 
-                self.canvas.draw()
+            self.canvas.draw()
 
     def edit_scatter(self):
         if self.fileDir != None:
@@ -151,7 +161,7 @@ class MyWindow(QWidget):
             plt.tight_layout()
             plt.show()
         else:
-            QMessageBox.about(self, 'Notice', 'Plese Load Img.')
+            QMessageBox.about(self, 'Notice', 'Plese Load IMG.')
 
     def add_point(self, event):
         if event.inaxes != self.ax:

@@ -1,3 +1,5 @@
+import glob
+
 import torch.nn as nn
 import torch
 import torch.nn.functional as F
@@ -32,13 +34,18 @@ def gray_to_rgb(gray):
 
 
 class dataload(Dataset):
-    def __init__(self, path='train', H=600, W=480, pow_n=3, aug=True):
+    def __init__(self, path='train', H=600, W=480, pow_n=3, aug=True, mode='img'):
 
-        self.path = path
+        self.mode = mode
+        if mode == 'img':
+            self.path = path
+            self.data_num = 1
+        elif mode == 'dir':
+            self.path = glob.glob(path + '/*.png')
+            self.data_num = len(self.path)
         # self.mask_num = int(len(self.dinfo.classes))  # 20
         # # print(self.mask_num)
         # # print(self.mask_num)
-        self.data_num = 1  #      150
         # # print(self.data_num)
         # self.path_mtx = np.array(self.dinfo.samples)[:, :1].reshape(self.mask_num,
         #                                                             self.data_num)  ## all data path loading  [ masks  20 , samples 150]
@@ -87,7 +94,10 @@ class dataload(Dataset):
         # input, heat = self.norm(mask[0:1]), mask[1:38]
         # heat = torch.pow(heat, self.pow_n)
         # heat = heat / heat.max()
-        input = Image.open(self.path)
+        if self.mode == 'img':
+            input = Image.open(self.path)
+        elif self.mode == 'dir':
+            input = Image.open(self.path[idx])
         input = self.mask_trans(input)
         input = self.norm(input)
         img_name = self.path
