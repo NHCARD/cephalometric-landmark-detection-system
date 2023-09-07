@@ -24,6 +24,7 @@ class MyWindow(QWidget):
         self.test_data = None
         self.H = 800
         self.W = 640
+        self.mode = None
         self.model = network.UNet(1, 38).to(self.device_txt)
         self.model.load_state_dict(torch.load(r"./net_1.3920683841206483e-06_E_709.pth", map_location=self.device_txt))
         self.model = self.model.eval()
@@ -47,14 +48,23 @@ class MyWindow(QWidget):
         btn_layout = QVBoxLayout()  # 버튼, 리스트 레이아웃
         load_img_btn = QPushButton("Load Img")
         load_img_btn.clicked.connect(self.img_load)
+        directory_btn = QPushButton("Load Directory")
+        directory_btn.clicked.connect(self.directory_load)
+        btn_layout = QVBoxLayout()  # 버튼, 리스트 레이아웃
+        load_img_btn = QPushButton("Load Img")
+        load_img_btn.clicked.connect(self.img_load)
         edit_btn = QPushButton('Edit Scatter')
         edit_btn.clicked.connect(self.edit_scatter)
+        
 
         file_list = QListWidget(self)
 
         btn_layout.addWidget(load_img_btn)
+
+        btn_layout.addWidget(directory_btn)
         btn_layout.addWidget(edit_btn)
         btn_layout.addWidget(file_list)
+
 
         layout.addLayout(btn_layout)
 
@@ -62,7 +72,7 @@ class MyWindow(QWidget):
 
     def img_load(self):
         self.fileDir, _ = QFileDialog.getOpenFileName(self, "Open Img", r'./0img',
-                                                      self.tr("Video Files (*.png)"))
+                                                          self.tr("Video Files (*.png)"))
 
         if self.fileDir != '':
             img = cv2.imread(self.fileDir)
@@ -78,6 +88,18 @@ class MyWindow(QWidget):
             print(e_time - s_time)
         else:
             pass
+
+    def directory_load (self):
+        self.fileDir, _ = QFileDialog.getExistingDirectory(self, "Open Directory", r'C:/')
+
+        if self.fileDir != '':
+            self.test_data = DataLoader(dataload(path=self.fileDir, H=self.H, W=self.W, aug=False), batch_size=1,
+                                        shuffle=False, num_workers=5)
+
+            s_time = time.time()
+            self.predict()
+            e_time = time.time()
+            print(e_time - s_time)
 
     def predict(self):
         Ymap, Xmap = np.mgrid[0:H:1, 0:W:1]
