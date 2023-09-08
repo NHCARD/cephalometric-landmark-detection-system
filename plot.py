@@ -7,6 +7,8 @@ from PyQt5.QtWidgets import *
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+
+import mytransforms.functional
 from net_hand import *
 import net_hand as network
 import torch
@@ -29,6 +31,8 @@ class MyWindow(QWidget):
         self.model = network.UNet(1, 38).to(self.device_txt)
         self.model.load_state_dict(torch.load(r"./net_1.3920683841206483e-06_E_709.pth", map_location=self.device_txt))
         self.model = self.model.eval()
+        self.pred = []
+        self.input = []
 
         super().__init__()
         self.fileDir = None
@@ -56,16 +60,15 @@ class MyWindow(QWidget):
         load_img_btn.clicked.connect(self.img_load)
         edit_btn = QPushButton('Edit Scatter')
         edit_btn.clicked.connect(self.edit_scatter)
-        
 
-        file_list = QListWidget(self)
+        self.file_list = QListWidget(self)
+        self.file_list.itemDoubleClicked.connect(self.List_click)
 
         btn_layout.addWidget(load_img_btn)
 
         btn_layout.addWidget(directory_btn)
         btn_layout.addWidget(edit_btn)
-        btn_layout.addWidget(file_list)
-
+        btn_layout.addWidget(self.file_list)
 
         layout.addLayout(btn_layout)
 
@@ -73,14 +76,27 @@ class MyWindow(QWidget):
 
     def img_load(self):
         self.fileDir, _ = QFileDialog.getOpenFileName(self, "Open Img", r'./0img',
-                                                          self.tr("Video Files (*.png)"))
+                                                      self.tr("Video Files (*.png)"))
 
         if self.fileDir != '':
             img = cv2.imread(self.fileDir)
             self.orig_H = img.shape[0]
             self.orig_W = img.shape[1]
 
-            self.test_data = DataLoader(dataload(path=self.fileDir, H=self.H, W=self.W, aug=False, mode='img'), batch_size=1,
+            self.file_list.addItem(self.fileDir)
+
+            # img = cv2.resize(img, (800, 640))
+
+            # tf_totensor = mytransforms.ToTensor()
+            # tf_resize = mytransforms.Resize((self.H, self.W))
+
+            # print(img.shape)
+            # self.test_data = img.reshape((1,) + img.shape)
+            # self.test_data = Image.fromarray(self.test_data)
+            # self.test_data = tf_totensor(self.test_data)
+
+            self.test_data = DataLoader(dataload(path=self.fileDir, H=self.H, W=self.W, aug=False, mode='img'),
+                                        batch_size=1,
                                         shuffle=False, num_workers=5)
 
             s_time = time.time()
@@ -94,9 +110,13 @@ class MyWindow(QWidget):
         self.fileDir = QFileDialog.getExistingDirectory(self, "Open Directory", r'./')
 
         if self.fileDir != '':
-            self.test_data = DataLoader(dataload(path=self.fileDir, H=self.H, W=self.W, aug=False, mode='dir'), batch_size=1,
+            self.test_data = DataLoader(dataload(path=self.fileDir, H=self.H, W=self.W, aug=False, mode='dir'),
+                                        batch_size=1,
                                         shuffle=False, num_workers=5)
 
+            f_list = glob.glob(self.fileDir + '/*.png')
+            for i in f_list:
+                self.file_list.addItem(f'{i}')
 
             img = cv2.imread(glob.glob(self.fileDir + '/*.png')[0])
 
@@ -117,31 +137,43 @@ class MyWindow(QWidget):
         ind = torch.cat([Xmap / W, Ymap / H], dim=1)
 
         with torch.no_grad():
-            for inputs, size, name in self.test_data:
+            ss_time = time.time()
+            for inputs, size, asdf in self.test_data:
+                ee_time = time.time()
+
                 inputs = inputs.to(self.device_txt)
 
                 outputs = self.model(inputs)
+                print(f'asdfasdf : {ee_time - ss_time}')
                 # print("outputs.shape : ", outputs.shape)
                 pred = torch.cat([argsoftmax(outputs[0].view(-1, H * W), Ymap, beta=1e-3) * (self.orig_H / H),
-                                argsoftmax(outputs[0].view(-1, H * W), Xmap, beta=1e-3) * (self.orig_W / W)],
-                                dim=1).detach().cpu()
-                print(len(size))
+                                  argsoftmax(outputs[0].view(-1, H * W), Xmap, beta=1e-3) * (self.orig_W / W)],
+                                 dim=1).detach().cpu()
+                # print(len(size))
+
+                self.pred.append(pred)
                 # print("pred : ", pred)
 
-                self.inputs = cv2.resize(inputs[0][0].detach().cpu().numpy(), (2880, 2400))
+                self.inputs_resize = cv2.resize(inputs[0][0].detach().cpu().numpy(), (2880, 2400))
+                self.input.append(self.inputs_resize)
 
             self.vis_output.clear()
-            ax = self.vis_output.add_subplot(111)
-            ax.axis('off')
-            ax.imshow(self.inputs, cmap='gray')
+            self.vis_origin.clear()
+            self.ax = self.vis_output.add_subplot(111)
+            self.origin_plot = self.vis_origin.add_subplot(111)
+            self.ax.axis('off')
+            self.ax.imshow(self.inputs_resize, cmap='gray')
+            self.origin_plot.axis('off')
+            self.origin_plot.imshow(self.inputs_resize, cmap='gray')
             # ax.subplots_adjust(left=0)
 
             pred = pred.detach().cpu().numpy()
 
             for i in pred:
-                ax.scatter(int(i[1]), int(i[0]), s=20, marker='.', c='b')
+                self.ax.scatter(int(i[1]), int(i[0]), s=20, marker='.', c='b')
 
             self.canvas.draw()
+            self.canvas2.draw()
 
     def edit_scatter(self):
         if self.fileDir != None:
@@ -184,6 +216,28 @@ class MyWindow(QWidget):
 
             plt.scatter(self.xdata, self.ydata, s=20, marker='.', c='b')
             plt.draw()
+
+    def List_click(self):
+        if self.fileDir != None:
+            num = self.file_list.currentRow()
+            print(len(self.input))
+
+            self.vis_output.clear()
+            self.vis_origin.clear()
+            self.ax = self.vis_output.add_subplot(111)
+            self.origin_plot = self.vis_origin.add_subplot(111)
+            self.origin_plot.axis('off')
+            self.ax.axis('off')
+
+            self.ax.imshow(self.input[num], cmap='gray')
+            self.origin_plot.imshow(self.input[num], cmap='gray')
+
+            for i in self.pred[num]:
+                self.ax.scatter(int(i[1]), int(i[0]), s=20, marker='.', c='b')
+
+            self.canvas.draw()
+            self.canvas2.draw()
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

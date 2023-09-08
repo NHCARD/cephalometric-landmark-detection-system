@@ -61,10 +61,10 @@ class dataload(Dataset):
         # augmenation of img and masks
         self.mask_trans = transforms.Compose([transforms.Resize((self.H, self.W)),
                                               transforms.Grayscale(1),
-                                              mytransforms.Affine(0,
-                                                                  translate=[0, 0],
-                                                                  scale=1,
-                                                                  fillcolor=0),
+                                              # mytransforms.Affine(0,
+                                              #                     translate=[0, 0],
+                                              #                     scale=1,
+                                              #                     fillcolor=0),
                                               transforms.ToTensor(),
 
                                               ])
