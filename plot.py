@@ -61,6 +61,29 @@ class MyWindow(QWidget):
         menubar = QMenuBar(self)
         filemenu = menubar.addMenu('&Menu')
 
+        menu_load_img = QAction('&Load Img', self)
+        menu_load_img.setShortcut('Ctrl+l')
+        menu_load_img.setStatusTip('Load to open Image ')
+        menu_load_img.triggered.connect(self.img_load)
+
+        menu_load_dir = QAction('&Load Dir', self)
+        menu_load_dir.setShortcut('Ctrl+d')
+        menu_load_dir.setStatusTip('Load to Image Directory Folder ')
+        menu_load_dir.triggered.connect(self.directory_load)
+
+        menu_edit = QAction('&Edit Scatter', self)
+        menu_edit.setShortcut('Ctrl+e')
+        menu_edit.setStatusTip('Image Edit to Scatter')
+        menu_edit.triggered.connect(self.edit_scatter)
+
+        menubar = QMenuBar(self)  # 메뉴바
+        fileMenu = menubar.addMenu('&Menu')
+        fileMenu.addAction(menu_load_img)
+        fileMenu.addAction(menu_load_dir)
+        fileMenu.addAction(menu_edit)
+        load_dir = QAction('Load Directory', self)
+
+        # filemenu.
         layout = QHBoxLayout()  # 메인 레이아웃 (Horizon)
         layout.addWidget(self.origin_canvas)
         layout.addWidget(self.output_canvas)
