@@ -94,7 +94,7 @@ class dataload(Dataset):
         # plt.show()
         # print("idx :", idx, "path ", self.task)
 
-        return [input, img_size]
+        return input
 
 
 # UNET parts
