@@ -321,7 +321,7 @@ class MyWindow(QWidget):
     def Delete_list(self):
 
         # if self.current_num != -1 and self.current_num != None and self.file_list.count() != 0:
-        del_num = self.file_list.currentItem()
+        del_num = self.file_list.currentRow()
         if del_num != -1:
             self.file_list.takeItem(del_num)
 
