@@ -60,17 +60,17 @@ class MyWindow(QWidget):
         self.output_canvas = FigureCanvas(self.vis_output)  # 아웃풋 이미지 출력 박스
 
 
-        menu_load_img = QAction('&Load Img', self)
+        menu_load_img = QAction('&Load Image', self)
         menu_load_img.setShortcut('Ctrl+l')
-        menu_load_img.setStatusTip('Load to open Image ')
+        menu_load_img.setStatusTip('Load to open Image')
         menu_load_img.triggered.connect(self.img_load)
 
-        menu_load_dir = QAction('&Load Dir', self)
+        menu_load_dir = QAction('&Load Folder', self)
         menu_load_dir.setShortcut('Ctrl+d')
-        menu_load_dir.setStatusTip('Load to Image Directory Folder ')
+        menu_load_dir.setStatusTip('Load to Image Folder ')
         menu_load_dir.triggered.connect(self.directory_load)
 
-        menu_edit = QAction('&Edit Scatter', self)
+        menu_edit = QAction('&Edit', self)
         menu_edit.setShortcut('Ctrl+e')
         menu_edit.setStatusTip('Image Edit to Scatter')
         menu_edit.triggered.connect(self.edit_scatter)
@@ -87,24 +87,21 @@ class MyWindow(QWidget):
         fileMenu.addAction(menu_load_dir)
         fileMenu.addAction(menu_edit)
         fileMenu.addAction(menu_excel)
-        load_dir = QAction('Load Directory', self)
+        load_dir = QAction('Load Folder', self)
 
         layout = QHBoxLayout()  # 메인 레이아웃 (Horizon)
         layout.addWidget(self.origin_canvas)
         layout.addWidget(self.output_canvas)
 
-        load_img_btn = QPushButton("Load Img")
-        load_img_btn.clicked.connect(self.img_load)
-
-        directory_btn = QPushButton("Load Directory")
+        directory_btn = QPushButton("Load Folder")
         directory_btn.clicked.connect(self.directory_load)
 
         btn_layout = QVBoxLayout()  # 버튼, 리스트 레이아웃
 
-        load_img_btn = QPushButton("Load Img")
+        load_img_btn = QPushButton("Load Image")
         load_img_btn.clicked.connect(self.img_load)
 
-        edit_btn = QPushButton('Edit Scatter')
+        edit_btn = QPushButton('Edit')
         edit_btn.clicked.connect(self.edit_scatter)
 
         self.file_list = QListWidget(self)
@@ -125,7 +122,7 @@ class MyWindow(QWidget):
         self.layout = layout
 
     def img_load(self):
-        self.fileDir, _ = QFileDialog.getOpenFileName(self, "Open Img", r'./0img',
+        self.fileDir, _ = QFileDialog.getOpenFileName(self, "Open Image", r'./0img',
                                                       self.tr("Video Files (*.png)"))
 
         if self.fileDir != '':
@@ -163,7 +160,7 @@ class MyWindow(QWidget):
         self.current_num = self.file_list.count() - 1
 
     def directory_load(self):
-        self.fileDir = QFileDialog.getExistingDirectory(self, "Open Directory", r'./')
+        self.fileDir = QFileDialog.getExistingDirectory(self, "Open Folder", r'./')
 
         if self.fileDir != '':
             self.test_data = DataLoader(dataload(path=self.fileDir, H=self.H, W=self.W, aug=False, mode='dir'),
@@ -197,6 +194,7 @@ class MyWindow(QWidget):
 
         with torch.no_grad():
             for inputs in self.test_data:
+                print(inputs.size)
                 # input = inputs[0][0].numpy()
                 # plt.imshow(input)
                 # plt.show()
@@ -260,7 +258,7 @@ class MyWindow(QWidget):
             plt.tight_layout()
             plt.show()
         else:
-            QMessageBox.about(self, 'Notice', 'please Load IMG.')
+            QMessageBox.about(self, 'Notice', 'Please Load IMAGE.')
 
     def add_point(self, event):
         if event.inaxes != self.edit_plot:
