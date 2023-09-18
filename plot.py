@@ -40,13 +40,14 @@ class MyWindow(QWidget):
         self.pred = []
         self.input = []
         self.current_num = None
-        self.update_pred= None
+        self.update_pred = None
+        self.landmark_name = []
 
         super().__init__()
         self.fileDir = None
         self.initUI()
         self.setLayout(self.layout)
-        self.setWindowTitle('')
+        self.setWindowTitle('Landmark Detection System')
         self.setGeometry(200, 200, 1400, 800)  # 창의 위치 x좌표, y좌표, 가로크기, 세로 크기
         self.setFixedWidth(1400)
         self.setFixedHeight(800)
@@ -58,8 +59,6 @@ class MyWindow(QWidget):
         self.origin_canvas = FigureCanvas(self.vis_origin)  # 인풋 이미지 출력 박스
         self.output_canvas = FigureCanvas(self.vis_output)  # 아웃풋 이미지 출력 박스
 
-        menubar = QMenuBar(self)
-        filemenu = menubar.addMenu('&Menu')
 
         menu_load_img = QAction('&Load Img', self)
         menu_load_img.setShortcut('Ctrl+l')
@@ -76,14 +75,20 @@ class MyWindow(QWidget):
         menu_edit.setStatusTip('Image Edit to Scatter')
         menu_edit.triggered.connect(self.edit_scatter)
 
+        menu_excel = QAction('&Save Excel', self)
+        menu_excel.setShortcut('Ctrl+x')
+        menu_excel.setStatusTip('Save Exdcel File')
+        menu_excel.triggered.connect(self.excel_save)
+
         menubar = QMenuBar(self)  # 메뉴바
-        fileMenu = menubar.addMenu('&Menu')
+        fileMenu = menubar.addMenu('&File')
+
         fileMenu.addAction(menu_load_img)
         fileMenu.addAction(menu_load_dir)
         fileMenu.addAction(menu_edit)
+        fileMenu.addAction(menu_excel)
         load_dir = QAction('Load Directory', self)
 
-        # filemenu.
         layout = QHBoxLayout()  # 메인 레이아웃 (Horizon)
         layout.addWidget(self.origin_canvas)
         layout.addWidget(self.output_canvas)
@@ -115,6 +120,7 @@ class MyWindow(QWidget):
         btn_layout.addWidget(self.del_list)
 
         layout.addLayout(btn_layout)
+        layout.setMenuBar(menubar)
 
         self.layout = layout
 
@@ -221,9 +227,11 @@ class MyWindow(QWidget):
 
             pred = pred.detach().cpu().numpy()
 
+            self.scat_list = []
+            self.text_list = []
             for idx, i in enumerate(pred):
-                self.pred_plot.scatter(int(i[1]), int(i[0]), s=20, marker='.', c='b')
-                self.pred_plot.text(i[1] + 0.02, i[0] + 0.02, f'{idx + 1}', c='r', fontsize=7)
+                self.scat_list.append(self.pred_plot.scatter(int(i[1]), int(i[0]), s=20, marker='.', c='b'))
+                self.text_list.append(self.pred_plot.text(i[1] + 0.02, i[0] + 0.02, f'{idx + 1}', c='r', fontsize=7))
 
             self.output_canvas.draw()
             self.origin_canvas.draw()
@@ -239,10 +247,6 @@ class MyWindow(QWidget):
 
             for y, x in self.pred[self.current_num]:
                 self.scat_list.append(self.edit_plot.scatter(x, y, s=20, marker='.', c='b'))
-
-            # self.scat = self.edit_plot.scatter(self.pred[self.current_num][1], self.pred[self.current_num][0], s=20, marker='.', c='b')
-            # self.scat = plt.scater로 저장하고 찍어보기, pred 값을 직접 읽어서 찍기!, self.scat.remove는 이러면 작동하는가?
-
 
             plt.xlabel('x')
             plt.ylabel('y')
@@ -267,6 +271,9 @@ class MyWindow(QWidget):
             plt.draw()
 
         if event.button == 3:
+            remove_x = event.xdata
+            remove_y = event.ydata
+
             self.scat_list[-1].remove()
             self.scat_list.pop()
 
@@ -274,9 +281,19 @@ class MyWindow(QWidget):
 
         if event.button == 2:
             self.update_canvas()
+            plt.close(self.edit_output)
 
     def update_canvas(self):
-        pass
+        print(len(self.scat_list))
+        if len(self.scat_list) != 0 and len(self.text_list) != 0:
+            for scat, text in zip(self.scat_list, self.text_list):
+                scat.remove()
+                text.remove()
+
+            self.scat_list = []
+            self.text_list = []
+
+            self.output_canvas.draw()
 
     def list_click(self):
         if self.fileDir != None:
@@ -303,14 +320,16 @@ class MyWindow(QWidget):
 
     def Delete_list(self):
 
-        if self.current_num != -1:
-            self.file_list.takeItem(self.current_num)
+        # if self.current_num != -1 and self.current_num != None and self.file_list.count() != 0:
+        del_num = self.file_list.currentItem()
+        if del_num != -1:
+            self.file_list.takeItem(del_num)
 
-            self.input.pop(self.current_num)
-            self.pred.pop(self.current_num)
+            self.input.pop(del_num)
+            self.pred.pop(del_num)
+
         else:
             pass
-
         # 현재 선택된 표시된 이미지 출력했을 때 다음 이미지로 뜨게 처리
 
     def excel_save(self):
@@ -319,11 +338,26 @@ class MyWindow(QWidget):
 
         write_ws = write_wb.create_sheet('Sheet1')
         write_ws = write_wb.active
-        for i in range(1, 38):
-            write_ws[f'{str(i)}']
+        # for i in range(1, 38):
+        #     write_ws[f'{str(i)}']
         # write_ws['B1'] = 'Sella'
-        write_ws['A2'] = self.file_list.currentItem().text()
-        write_ws['B2'] = 0
+        # write_ws['A2'] = self.file_list.currentItem().text()
+        # write_ws['B2'] = 0
+
+        # for line, name in zip(range(66, 91), self.landmark_name):
+        #     write_ws[f'{line}1'] = name
+
+        lll = ['B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U',
+               'V', 'W', 'X', 'Y', 'Z', 'AA', 'AB', 'AC', 'AD', 'AE', 'AF', 'AG', 'AH', 'AI', 'AJ', 'AK', 'AL', 'AM']
+
+        for idx, num in enumerate(lll):
+            write_ws[f'{num}1'] = idx + 1
+
+        for idx in range(self.file_list.count()):
+            write_ws[f'A{idx + 2}'] = self.file_list.item(idx).text()
+            for idx2, i in enumerate(lll):
+                pos = self.pred[idx][idx2].detach().cpu().numpy()
+                write_ws[f'{i}{idx+2}'] = f'{int(pos[0])}, {int(pos[1])}'
 
         write_wb.save('./test.xlsx')
 
