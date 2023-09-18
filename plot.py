@@ -333,7 +333,8 @@ class MyWindow(QWidget):
         # 현재 선택된 표시된 이미지 출력했을 때 다음 이미지로 뜨게 처리
 
     def excel_save(self):
-        self.savedir = QFileDialog.getExistingDirectory(self, "Open Directory", r'./')
+        self.savedir = QFileDialog.getSaveFileName(self, "Open Directory", r'./', 'xlsx files (*.xlsx)')
+        print(self.savedir)
         write_wb = openpyxl.Workbook()
 
         write_ws = write_wb.create_sheet('Sheet1')
@@ -359,7 +360,7 @@ class MyWindow(QWidget):
                 pos = self.pred[idx][idx2].detach().cpu().numpy()
                 write_ws[f'{i}{idx+2}'] = f'{int(pos[0])}, {int(pos[1])}'
 
-        write_wb.save('./test.xlsx')
+        write_wb.save(self.savedir[0])
 
 
 if __name__ == "__main__":
