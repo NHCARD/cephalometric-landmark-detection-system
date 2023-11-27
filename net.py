@@ -11,14 +11,6 @@ from torch.utils.data import Dataset, DataLoader
 import random
 import cv2
 
-def gray_to_rgb(gray):
-    h, w = gray.shape
-    rgb = np.zeros((h, w, 3))
-    rgb[:, :, 0] = gray;
-    rgb[:, :, 1] = gray;
-    rgb[:, :, 2] = gray;
-    return rgb
-
 
 class dataload(Dataset):
     def __init__(self, path='train', H=600, W=480, pow_n=3, aug=True, mode='img'):
