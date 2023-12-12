@@ -2,13 +2,12 @@ import os
 import sys
 
 import cv2
-import numpy as np
 from PyQt5.QtWidgets import *
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from torch.utils.data import DataLoader
 
-from dataload import *
+from dataload import dataload_valid
 from utils import *
 import openpyxl
 
@@ -94,7 +93,7 @@ class MyWindow(QWidget):
             find_idx = self.fileDir.rindex('/')
             self.file_list.addItem(self.fileDir[find_idx + 1:])
 
-            self.test_data = DataLoader(dataload(path=self.fileDir, H=self.H, W=self.W, aug=False, mode='img'))
+            self.test_data = DataLoader(dataload_valid(path=self.fileDir, H=self.H, W=self.W, aug=False, mode='img'))
             self.predict()
         else:
             pass
@@ -105,7 +104,7 @@ class MyWindow(QWidget):
         self.fileDir = QFileDialog.getExistingDirectory(self, "Open Folder", r'./')
 
         if self.fileDir != '':
-            self.test_data = DataLoader(dataload(path=self.fileDir, H=self.H, W=self.W, aug=False, mode='dir'),
+            self.test_data = DataLoader(dataload_valid(path=self.fileDir, H=self.H, W=self.W, aug=False, mode='dir'),
                                         batch_size=1, shuffle=False, num_workers=5)
 
             f_list = os.listdir(self.fileDir)
