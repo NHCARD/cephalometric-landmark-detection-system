@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from torch.utils.data import DataLoader
 
-from dataload import dataload_valid
+from dataload import *
 from utils import *
 import openpyxl
 
