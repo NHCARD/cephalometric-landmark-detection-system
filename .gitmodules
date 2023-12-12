@@ -1,0 +1,3 @@
+[submodule "CL-Data"]
+	path = CL-Data
+	url = https://github.com/NHCARD/CL-Data.git
