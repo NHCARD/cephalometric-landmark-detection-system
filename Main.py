@@ -15,8 +15,8 @@ pow_n = 10
 batch_size = 4
 num_workers = 5
 dataloaders = {
-    'train': DataLoader(dataload_train(path=r"./dataset/train", H=H, W=W, pow_n=pow_n, aug=True), batch_size=batch_size, shuffle=True, num_workers=num_workers),
-    'valid': DataLoader(dataload_train(path=r"./dataset/val", H=H, W=W, pow_n=pow_n, aug=False), batch_size=batch_size, shuffle=False, num_workers=num_workers)
+    'train': DataLoader(dataload_train(path=r"./CL-Data/dataset/train", H=H, W=W, pow_n=pow_n, aug=True), batch_size=batch_size, shuffle=True, num_workers=num_workers),
+    'valid': DataLoader(dataload_train(path=r"./CL-Data/dataset/val", H=H, W=W, pow_n=pow_n, aug=False), batch_size=batch_size, shuffle=False, num_workers=num_workers)
 }
 
 
