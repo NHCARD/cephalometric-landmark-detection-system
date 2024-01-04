@@ -13,7 +13,7 @@ def load_model(phase='train', num_classes=38):
     device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
     model = network.UNet(1, num_classes).to(device)
     if phase != 'train':
-        model.load_state_dict(torch.load(r"net_1.3920683841206483e-06_E_709.pth", map_location=device))
+        model.load_state_dict(torch.load(r"./net_1.3920683841206483e-06_E_709.pth", map_location=device))
         model = model.eval()
 
     return model

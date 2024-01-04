@@ -28,7 +28,7 @@ def Laplace(center, sigmaD=None):  # Gaussian Filter
 
 
 if __name__ == "__main__":
-    with open('./CL-Data/train-gt.json') as file:
+    with open('../CL-Data/train-gt.json') as file:
         json_data = json.load(file)
         points = json_data.get('points')
 

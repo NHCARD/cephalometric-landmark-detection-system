@@ -7,7 +7,7 @@ import tqdm
 from torch.utils.data import DataLoader
 
 import UNet as network
-from dataload import dataload_train
+from utils.dataload import dataload_train
 
 H = 224
 W = 224
