@@ -83,7 +83,7 @@ class MyWindow(QWidget):
         return btn
 
     def img_load(self):
-        self.fileDir, _ = QFileDialog.getOpenFileName(self, "Open Image", r'./0img',
+        self.fileDir, _ = QFileDialog.getOpenFileName(self, "Open Image", r'./CL-Data/dataset/val/0img',
                                                       self.tr("Video Files (*.png)"))
 
         if self.fileDir != '':
@@ -101,7 +101,7 @@ class MyWindow(QWidget):
         self.current_num = self.file_list.count() - 1
 
     def load_directory(self):
-        self.fileDir = QFileDialog.getExistingDirectory(self, "Open Folder", r'./')
+        self.fileDir = QFileDialog.getExistingDirectory(self, "Open Folder", r'./CL-Data/dataset/val')
 
         if self.fileDir != '':
             self.test_data = DataLoader(dataload_valid(path=self.fileDir, H=self.H, W=self.W, aug=False, mode='dir'),
