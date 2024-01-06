@@ -18,7 +18,7 @@ class MyWindow(QWidget):
 
         self.H = 800
         self.W = 640
-        self.device = 'cuda:0'
+        self.device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
         self.model = load_model('predict')
         self.pred = []
         self.input = []
