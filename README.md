@@ -1,10 +1,8 @@
-## 두부계측분석 인공지능 GUI 프로그램
+## Cephalometric Landmark Detection System:
+A user-friendly GUI that allows users to load cephalometric X-ray images, visualize the model's output, and conveniently edit landmark positions. 
 
----
-인공지능을 사용해 두부 X-ray 이미지에서 계측점 검출을 진행하고 GUI 프로그램을 사용하여 사용합니다.
-계측점 검출을 자동화하고, 이를 저장함으로써 업무량을 줄일 수 있습니다.
-추가요망.....
-
+![main.png](utils%2Fmain.png)
+*2023 SW인재페스티벌 출품작*
 
 ## Team Introduction
 
@@ -20,15 +18,13 @@
 
 # Requirements
 
----
-
-* python 3.8+
+* Python 3.8+
 * PyTorch
 * PyQT5
 * CUDA
 
 Our development environment
-* windows 11
+* Windows 11
 * PyTorch 1.13.0
 * PyQt5
 * CUDA 11.7
@@ -36,8 +32,7 @@ Our development environment
 
 # Installation
 
----
-Create a virtual environments
+Create a virtual environment
 
     conda create -n cl python=3.8
 
@@ -49,18 +44,20 @@ Install requirements
 
     pip install -r requirements.txt
 
-Clone this repository
+Clone repository
 
-    git clone https://github.com/NHCARD/CL-Contest.git
+    git clone https://github.com/NHCARD/cephalometric-landmark-detection-system.git
 
-Load Dataset from private submodule
+Load the dataset from private submodule
 
     git submodule init
     git submodule update
 
-# Stacks
+Run GUI
 
----
+    python plot.py
+
+# Stacks
 
 ![Python](https://img.shields.io/badge/Python-3.8-3776AB?logo=python)
 
